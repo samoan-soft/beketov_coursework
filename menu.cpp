@@ -28,8 +28,7 @@ void run_program()
 	int exactness = 200;
 	int change_x = window_w / 2; int change_y = window_h / 2;
 
-	bool menu_flag = true;
-	bool mandelbrot_flag = false;
+	bool menu_flag = true; bool mandelbrot_flag = false;
 
 	while (window.isOpen())
 	{

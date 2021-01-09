@@ -36,8 +36,8 @@ void draw_mandelbrot(sf::VertexArray& mandelbrot, int change_x, int change_y, in
     {
         for (int j = 0; j < window_w; j++)
         {
-            long double x = ((long double)j - change_x) / zoom;
-            long double y = ((long double)i - change_y) / zoom;
+            long double x = (static_cast<long double>(j) - change_x) / zoom;
+            long double y = (static_cast<long double>(i) - change_y) / zoom;
             complex buf;
             buf.r = x;
             buf.i = y;
