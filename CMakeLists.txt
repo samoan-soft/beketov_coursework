@@ -5,6 +5,8 @@ project(Mandelbrot)
 find_package(SFML 2.5 COMPONENTS audio graphics window system REQUIRED)
 
 set(SOURCES
+   menu.h
+   menu.cpp
    mandelbrot.h
    mandelbrot.cpp
    main.cpp

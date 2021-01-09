@@ -1,52 +1,58 @@
 ﻿#include "mandelbrot.h"
 
-void set_color(int& red, int& green, int& blue)//coloring pages on the border
+const int window_w = 1440; const int window_h = 960;
+
+struct complex
 {
-	red = (red + 5) < 155 ? red + 5 : 155;
-	if (red == 155)
-		green = (green + 3.5) < 155 ? green + 3.5 : 155;
-	if (green == 155)
-		blue = (blue + 2.2) < 155 ? blue + 2.2 : 155;
+    long double r{0};
+    long double i{0};
+};
+
+void coloring(sf::VertexArray& mandelbrot, int counter, int exactness, int i, int j)
+{
+    if (counter < exactness / 4.0f)
+    {
+        mandelbrot[i * window_w + j].position = sf::Vector2f(j, i);
+        sf::Color color(counter * 215.0f / (exactness / 4.0f), 0, 0);
+        mandelbrot[i * window_w + j].color = color;
+    }
+    else if (counter < exactness / 2.0f)
+    {
+        mandelbrot[i * window_w + j].position = sf::Vector2f(j, i);
+        sf::Color color(0, counter * 215.0f / (exactness / 2.0f), 0);
+        mandelbrot[i * window_w + j].color = color;
+    }
+    else if (counter < exactness)
+    {
+        mandelbrot[i * window_w + j].position = sf::Vector2f(j, i);
+        sf::Color color(0, 0, counter * 215.0f / exactness);
+        mandelbrot[i * window_w + j].color = color;
+    }
 }
 
-void draw_Mandelbrot(sf::Vector2<long double> x, sf::Vector2<long double> y)
+void draw_mandelbrot(sf::VertexArray& mandelbrot, int change_x, int change_y, int exactness, float zoom)
 {
-	const long double k = 0.0027;//expansion
-	const long double l = 0.0016;//coefficients
-	sf::RenderWindow window(sf::VideoMode(1440, 960), "Draw_Mandelbrot");// window 1440x960
-
-	sf::Color color;
-	sf::Image image;
-	int image_x, image_y;
-	image_x = image_y = 0;
-	image.create(1440, 960); //texture resolution
-
-	for (long double actual_x = x.x; actual_x <= x.y; actual_x += k, image_x++)
-	{
-		image_y = 0;
-		while (image_x >= 1440) image_x--;
-
-		for (long double actual_y = y.x; actual_y <= y.y; actual_y += k, image_y++)
-		{
-			while (image_y >= 960) image_y--;
-			color = sf::Color::Black;
-			std::complex<long double> z;
-			int red = 0, green = 0, blue = 0;
-
-			image.setPixel(image_x, image_y, sf::Color::Black);
-
-			for (int i = 0; i < 300; ++i) // detail
-			{
-				if (std::abs(z) * std::abs(z) > 3) // x^2+y^2 = R^2
-				{
-					color = sf::Color(red, green, blue);
-					image.setPixel(image_x, image_y, color);
-					break;
-				}
-				z = z * z + std::complex<long double>(actual_x, actual_y);//Z_n+1 = (Z_n)^2 + Z_0;
-				set_color(red, green, blue);
-			}
-		}
-	}
-	image.saveToFile("mandelbrot_image.png");
+    for (int i = 0; i < window_h; i++)
+    {
+        for (int j = 0; j < window_w; j++)
+        {
+            long double x = ((long double)j - change_x) / zoom;
+            long double y = ((long double)i - change_y) / zoom;
+            complex buf;
+            buf.r = x;
+            buf.i = y;
+            complex z1 = buf;
+            int counter = 0;
+            for (int k = 0; k < exactness; k++)
+            {
+                complex z2;
+                z2.r = z1.r * z1.r - z1.i * z1.i; z2.i = 2 * z1.r * z1.i;
+                z2.r += buf.r; z2.i += buf.i;
+                z1 = z2;
+                counter++;
+                if (z1.r * z1.r + z1.i * z1.i > 3.0) break;
+            }
+            coloring(mandelbrot, counter, exactness, i, j);
+        }
+    }
 }
