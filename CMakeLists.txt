@@ -1,19 +1,56 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.12)
 
-project(Mandelbrot)
+set(PROJECT_NAME Drawing_fractals)
 
-find_package(SFML 2.5 COMPONENTS audio graphics window system REQUIRED)
+project(${PROJECT_NAME})
 
-set(SOURCES
-   menu.h
-   menu.cpp
-   mandelbrot.h
-   mandelbrot.cpp
-   main.cpp
-)
+set(CMAKE_CXX_STANDARD 11)
 
-add_executable(Mandelbrot ${SOURCES})
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-target_link_libraries(Mandelbrot sfml-audio sfml-graphics sfml-window sfml-system)
+find_package(Doxygen)
 
-set_target_properties(Mandelbrot PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+option(BUILD_DOCUMENTATION "Create and install documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+
+if(DOXYGEN_FOUND)
+
+	set(DOXYGEN ${CMAKE_SOURCE_DIR}/documentation/Doxyfile.in)
+	
+    message("Doxygen build started")
+	
+	add_custom_target(
+		docs ALL
+		COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN}
+		COMMENT "Generating documentation with Doxygen"
+		VERBATIM
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/documentation
+	)
+    message("Doxygen build completed")
+
+endif()
+
+include_directories(sources)
+
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
+
+install(FILES 
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-graphics-2.dll
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-system-2.dll
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-window-2.dll 
+	DESTINATION ${CMAKE_SOURCE_DIR}/programm
+	CONFIGURATIONS Release)
+
+install(FILES 
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-graphics-d-2.dll
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-system-d-2.dll
+	${CMAKE_SOURCE_DIR}/SFML-2.4.2/bin/sfml-window-d-2.dll 
+	DESTINATION ${CMAKE_SOURCE_DIR}/programm
+	CONFIGURATIONS Debug)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/textures 
+	DESTINATION ${CMAKE_SOURCE_DIR}/programm)
+
+add_subdirectory(sources)
+
+install(TARGETS ${PROJECT_NAME} 
+	DESTINATION ${CMAKE_SOURCE_DIR}/programm)
